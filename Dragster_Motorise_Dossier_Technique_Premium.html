@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dragster Motorisé - Dossier Technique Premium</title>
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+:root {
+  color-scheme: dark;
+  --bg-color: #090A0F;
+  --bg-elevated: #12151E;
+  --text-primary: #F4F7FB;
+  --text-secondary: #A1AAB8;
+  --accent-orange: #FF5500;
+  --accent-amber: #FF8800;
+  --accent-cyan: #00D2FF;
+  --glass-fill: rgba(18, 22, 31, .58);
+  --glass-border: rgba(255, 255, 255, .11);
+  --glass-glow: rgba(255, 85, 0, .19);
+  --success-green: #61D99B;
+  --danger-red: #FF5E62;
+  --blue-tech: #31B9E8;
+  --purple-tech: #A78BFA;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
+  --display: 'Space Grotesk', 'Inter', sans-serif;
+  --body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --page-gutter: clamp(1.25rem, 7.4vw, 8.5rem);
+  --scroll-blur: 0px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html {
+  min-width: 320px;
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+  scrollbar-color: rgba(255, 105, 27, .62) rgba(255,255,255,.04);
+  background: var(--bg-color);
+}
+body {
+  position: relative;
+  min-width: 320px;
+  margin: 0;
+  overflow-x: hidden;
+  background:
+    radial-gradient(ellipse at 78% 7%, rgba(255,85,0,.12), transparent 34%),
+    radial-gradient(ellipse at 10% 62%, rgba(0,210,255,.055), transparent 35%),
+    linear-gradient(145deg, #090A0F 0%, #0C0F16 55%, #090A0F 100%);
+  color: var(--text-primary);
+  font-family: var(--body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: '';
+  opacity: .23;
+  background-image: linear-gradient(rgba(255,255,255,.026) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.026) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: linear-gradient(to bottom, black, transparent 92%);
+  filter: blur(var(--scroll-blur));
+}
+body::after {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  content: '';
+  opacity: .22;
+  background: radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,.55) 100%);
+}
+
+#ambientCanvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: .78;
+}
+
+/* Interface de navigation */
+.top-progress {
+  position: fixed;
+  z-index: 70;
+  inset: 0 0 auto;
+  height: 3px;
+  background: rgba(255,255,255,.055);
+  pointer-events: none;
+}
+.top-progress span {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-orange), var(--accent-amber) 60%, var(--accent-cyan));
+  box-shadow: 0 0 16px rgba(255,85,0,.75), 0 0 28px rgba(0,210,255,.24);
+  transition: width .22s ease-out;
+}
+.topbar {
+  position: fixed;
+  z-index: 60;
+  top: 17px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+.brand-lockup { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-mark {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255,126,52,.48);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(255,85,0,.22), rgba(255,255,255,.045));
+  box-shadow: 0 0 24px rgba(255,85,0,.15), inset 0 1px 0 rgba(255,255,255,.16);
+  color: #fff;
+  font: 700 12px var(--mono);
+  letter-spacing: -.08em;
+}
+.brand-copy { display: flex; flex-direction: column; gap: 3px; }
+.brand-copy strong { color: #F7F8FA; font: 700 11px var(--display); letter-spacing: .16em; }
+.brand-copy small { color: #778293; font: 500 9px var(--mono); letter-spacing: .13em; }
+.topbar-right { display: flex; align-items: center; gap: 14px; }
+.status-pill, .counter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 999px;
+  background: rgba(12,15,22,.62);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #AAB3C1;
+  font: 500 10px var(--mono);
+  letter-spacing: .08em;
+}
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-orange); box-shadow: 0 0 10px var(--accent-orange); }
+#slideCounter { color: #fff; }
+
+#menuToggle, .nav-arrow {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(255,255,255,.10), rgba(255,255,255,.025));
+  box-shadow: 0 8px 26px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.12);
+  color: #F9FAFB;
+  cursor: pointer;
+  transition: border-color .25s, background .25s, transform .25s, box-shadow .25s;
+}
+#menuToggle:hover, .nav-arrow:hover { border-color: rgba(255,110,39,.6); background: rgba(255,85,0,.15); box-shadow: 0 0 22px rgba(255,85,0,.17); transform: translateY(-2px); }
+#menuToggle svg, .nav-arrow svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.side-panel {
+  position: fixed;
+  z-index: 65;
+  top: 72px;
+  left: 20px;
+  width: min(330px, calc(100vw - 40px));
+  max-height: min(72vh, 720px);
+  padding: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(23,27,37,.91), rgba(9,12,18,.88));
+  box-shadow: 0 28px 90px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.1), 0 0 50px rgba(255,85,0,.06);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-9px) scale(.985);
+  transform-origin: top left;
+  transition: opacity .22s ease, transform .22s ease, visibility .22s;
+}
+.side-panel.open { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+.panel-heading { display: flex; align-items: center; justify-content: space-between; padding: 2px 2px 14px; border-bottom: 1px solid rgba(255,255,255,.08); color: #8C96A6; font: 600 10px var(--mono); letter-spacing: .15em; }
+.panel-heading span:last-child { color: var(--accent-orange); }
+#slideNav { display: grid; gap: 4px; max-height: calc(min(72vh, 720px) - 66px); margin-top: 12px; overflow-y: auto; padding-right: 5px; scrollbar-width: thin; scrollbar-color: rgba(255,85,0,.5) transparent; }
+.nav-item {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 11px;
+  background: transparent;
+  color: #9AA4B3;
+  text-align: left;
+  cursor: pointer;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.nav-item span:first-child { color: #667183; font: 500 10px var(--mono); }
+.nav-item span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 600; }
+.nav-item:hover, .nav-item.active { border-color: rgba(255,115,48,.21); background: linear-gradient(90deg, rgba(255,85,0,.15), rgba(255,85,0,.025)); color: #FFF; }
+.nav-item.active span:first-child { color: var(--accent-orange); }
+
+.bottom-nav {
+  position: fixed;
+  z-index: 55;
+  right: 22px;
+  bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  background: rgba(12,15,22,.68);
+  box-shadow: 0 15px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.bottom-nav .nav-arrow { width: 36px; height: 36px; border-radius: 11px; }
+.bottom-nav .nav-arrow:disabled { opacity: .28; cursor: not-allowed; transform: none; }
+.bottom-nav-copy { display: flex; min-width: 112px; flex-direction: column; gap: 3px; padding: 0 6px; }
+.bottom-nav-copy strong { max-width: 150px; overflow: hidden; color: #F3F5F8; text-overflow: ellipsis; white-space: nowrap; font: 600 10px var(--display); }
+.bottom-nav-copy small { color: #778293; font: 500 8px var(--mono); letter-spacing: .1em; }
+
+/* Fond et diapositives */
+.slide {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+  justify-content: center;
+  padding: clamp(7rem, 11vh, 8.5rem) var(--page-gutter) clamp(6rem, 9vh, 7rem);
+  overflow: visible;
+  border-bottom: 1px solid rgba(255,255,255,.055);
+  scroll-snap-align: start;
+  scroll-snap-stop: normal;
+}
+.slide::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+  opacity: .78;
+  background: radial-gradient(ellipse at 90% 18%, rgba(255,85,0,.075), transparent 30%), radial-gradient(ellipse at 0% 78%, rgba(0,210,255,.035), transparent 32%);
+}
+.slide:nth-of-type(3n)::before { background: radial-gradient(ellipse at 8% 20%, rgba(0,210,255,.07), transparent 30%), radial-gradient(ellipse at 90% 78%, rgba(255,85,0,.06), transparent 32%); }
+.slide-number {
+  position: absolute;
+  top: clamp(4.3rem, 8vh, 6.5rem);
+  right: var(--page-gutter);
+  z-index: -1;
+  color: rgba(255,255,255,.035);
+  font: 700 clamp(6rem, 16vw, 15rem)/.8 var(--display);
+  letter-spacing: -.1em;
+  pointer-events: none;
+  user-select: none;
+}
+
+h1, h2, h3, h4 { color: var(--text-primary); font-family: var(--display); font-weight: 700; letter-spacing: -.045em; }
+h2 {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 0 clamp(1.35rem, 3vh, 2.2rem);
+  padding: 0 0 0 21px;
+  border: 0;
+  color: #F4F6FA;
+  font-size: clamp(2rem, 4.1vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.055em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+h2::before {
+  position: absolute;
+  top: .08em;
+  bottom: .08em;
+  left: 0;
+  width: 3px;
+  border-radius: 3px;
+  content: '';
+  background: linear-gradient(180deg, var(--accent-amber), var(--accent-orange), transparent);
+  box-shadow: 0 0 15px rgba(255,85,0,.55);
+}
+h2::after {
+  display: block;
+  width: clamp(50px, 8vw, 104px);
+  height: 1px;
+  margin-top: 14px;
+  content: '';
+  background: linear-gradient(90deg, var(--accent-orange), rgba(255,85,0,0));
+}
+h3 { margin: 0 0 .8rem; font-size: clamp(1.1rem, 1.6vw, 1.55rem); letter-spacing: -.035em; }
+h4 { font-size: 1rem; letter-spacing: -.02em; }
+p, li { color: var(--text-secondary); font-family: var(--body); font-size: clamp(.94rem, 1.07vw, 1.12rem); line-height: 1.72; }
+p + p { margin-top: .8rem; }
+strong { color: #F5F7FA; font-weight: 700; }
+small { font-size: .78em; }
+em { color: #C1CAD6; }
+
+/* Verre liquide */
+.glass-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: clamp(1.3rem, 2.5vw, 2.4rem);
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(25,30,41,.77), rgba(13,16,24,.62)) padding-box, linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.035) 36%, rgba(255,110,35,.18) 72%, rgba(0,210,255,.12)) border-box;
+  box-shadow: 0 24px 70px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.10), inset 0 -1px 0 rgba(255,255,255,.025), 0 0 36px rgba(255,85,0,.035);
+  backdrop-filter: blur(22px) saturate(155%);
+  -webkit-backdrop-filter: blur(22px) saturate(155%);
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+  transform-style: preserve-3d;
+  transition: border-color .3s, box-shadow .3s, background .3s, transform .3s cubic-bezier(.2,.75,.2,1);
+}
+.glass-card::before {
+  position: absolute;
+  top: 0;
+  left: 8%;
+  width: 84%;
+  height: 1px;
+  content: '';
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.42), rgba(255,160,105,.3), transparent);
+  opacity: .8;
+}
+.glass-card::after {
+  position: absolute;
+  top: -65%;
+  right: -28%;
+  width: 58%;
+  height: 95%;
+  border-radius: 50%;
+  content: '';
+  background: radial-gradient(ellipse, rgba(255,255,255,.045), transparent 68%);
+  pointer-events: none;
+}
+.glass-card:hover { --lift: -4px; box-shadow: 0 30px 82px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.13), 0 0 36px rgba(255,85,0,.075); }
+
+.hero-title {
+  margin: 0 0 .6rem;
+  color: #FFF;
+  font: 700 clamp(4rem, 10vw, 9.5rem)/.82 var(--display);
+  letter-spacing: -.095em;
+  text-shadow: 0 12px 50px rgba(0,0,0,.28);
+}
+.hero-title::first-line { color: #FFF; }
+.hero-subtitle {
+  margin: 0 0 1.25rem;
+  color: var(--accent-amber);
+  font: 600 clamp(.75rem, 1.05vw, .95rem) var(--mono);
+  letter-spacing: .24em;
+  text-transform: uppercase;
+}
+.slide#slide1 { align-items: flex-start; }
+.slide#slide1 > .glass-card { width: min(100%, 1040px); max-height: 47vh; padding: clamp(.55rem, 1.2vw, 1rem); }
+.slide#slide1 > .glass-card .premium-img { max-height: 43vh; object-fit: contain; }
+.slide#slide1 > p { color: #E5EAF0; font-family: var(--display); font-size: clamp(1rem, 1.5vw, 1.35rem); }
+
+.premium-img, .gantt-img {
+  display: block;
+  width: 100%;
+  max-height: 46vh;
+  margin: .8rem 0;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 17px;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(0,0,0,.24));
+  box-shadow: 0 16px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.08);
+  object-fit: contain;
+  filter: saturate(.88) contrast(1.06) brightness(.96);
+  transition: transform .55s cubic-bezier(.2,.75,.2,1), filter .35s, box-shadow .35s;
+}
+.premium-img:hover, .gantt-img:hover { transform: scale(1.025); filter: saturate(1.05) contrast(1.08) brightness(1.03); box-shadow: 0 24px 55px rgba(0,0,0,.48), 0 0 25px rgba(255,85,0,.08); }
+.gantt-img { max-height: 68vh; object-fit: contain; }
+
+.formula {
+  display: inline-block;
+  max-width: 100%;
+  margin: .75rem 0;
+  padding: .9rem 1.2rem;
+  border: 1px solid rgba(255,110,38,.31);
+  border-radius: 13px;
+  background: linear-gradient(120deg, rgba(255,85,0,.115), rgba(255,255,255,.025));
+  box-shadow: inset 0 0 24px rgba(255,85,0,.055), 0 7px 25px rgba(0,0,0,.18);
+  color: #FF9A5B;
+  font: 600 clamp(1rem, 1.55vw, 1.45rem)/1.4 var(--mono);
+  letter-spacing: -.055em;
+  transition: color .25s, border-color .25s, box-shadow .25s, transform .25s;
+  cursor: default;
+}
+.formula:hover, .formula:focus-visible { border-color: rgba(255,139,72,.8); color: #FFD0B2; box-shadow: 0 0 26px rgba(255,85,0,.17), inset 0 0 22px rgba(255,85,0,.10); transform: translateY(-2px); outline: none; }
+.highlight-box {
+  position: relative;
+  margin: 1.25rem 0;
+  padding: 1.2rem 1.4rem;
+  overflow: hidden;
+  border: 1px solid rgba(255,105,39,.22);
+  border-left: 3px solid var(--accent-orange);
+  border-radius: 4px 14px 14px 4px;
+  background: linear-gradient(100deg, rgba(255,85,0,.115), rgba(255,255,255,.025));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 12px 30px rgba(0,0,0,.13);
+}
+.highlight-box strong { color: #FFF; }
+.grid-2, .grid-3 { display: grid; gap: clamp(1rem, 2vw, 1.8rem); margin-top: 1.4rem; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-2 > *, .grid-3 > * { min-width: 0; }
+
+.flow-row { display: flex; align-items: stretch; justify-content: space-between; gap: 10px; margin: 1.6rem 0; flex-wrap: wrap; }
+.flow-step {
+  display: flex;
+  min-width: 120px;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 13px;
+  background: linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.018));
+  color: #EAF0F6;
+  font: 600 .88rem/1.45 var(--display);
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055), 0 10px 25px rgba(0,0,0,.12);
+  transition: border-color .25s, background .25s, transform .25s;
+}
+.flow-step:hover { border-color: rgba(255,120,54,.5); background: rgba(255,85,0,.075); transform: translateY(-3px); }
+.flow-step small { margin-top: 4px; color: #8D99A9; font: 500 .72rem var(--mono); }
+.flow-arrow { align-self: center; color: var(--accent-orange); font: 600 1.65rem var(--mono); text-shadow: 0 0 15px rgba(255,85,0,.45); }
+.schema-box {
+  position: relative;
+  padding: 1.6rem;
+  border: 1px dashed rgba(255,255,255,.22);
+  border-radius: 17px;
+  background: radial-gradient(ellipse at top, rgba(255,255,255,.06), rgba(0,0,0,.16));
+  text-align: center;
+}
+.timeline-container { display: flex; justify-content: space-between; gap: 12px; margin-top: 2rem; position: relative; }
+.timeline-container::before { position: absolute; top: 24px; left: 4%; width: 92%; height: 1px; content: ''; background: linear-gradient(90deg, rgba(255,85,0,.55), rgba(255,255,255,.12), rgba(0,210,255,.3)); }
+.timeline-node { position: relative; z-index: 1; flex: 1; text-align: center; }
+.timeline-dot {
+  display: flex;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,132,70,.65);
+  border-radius: 50%;
+  background: linear-gradient(145deg, #24202A, #0C1017);
+  box-shadow: 0 0 25px rgba(255,85,0,.17), inset 0 1px 0 rgba(255,255,255,.14);
+  color: #FF9A5B;
+  font: 700 1rem var(--mono);
+}
+.timeline-node p { font-size: .9rem; }
+.matrix-table { width: 100%; margin-top: 1rem; border-collapse: collapse; font-size: 1rem; }
+.matrix-table th, .matrix-table td { padding: 1rem; border-bottom: 1px solid rgba(255,255,255,.09); text-align: left; }
+.matrix-table th { color: var(--accent-amber); font: 600 .78rem var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.matrix-table td { color: #C6CFDA; }
+.matrix-table tr:hover td { background: rgba(255,255,255,.025); color: #FFF; }
+.slide#slide32 .highlight-box::after { display: block; width: 89%; height: 5px; margin-top: 18px; border-radius: 10px; content: ''; background: linear-gradient(90deg, var(--accent-orange), var(--accent-amber), var(--accent-cyan)); box-shadow: 0 0 15px rgba(255,85,0,.26); transform-origin: left; animation: scoreFill 1.5s cubic-bezier(.2,.75,.2,1) both; }
+@keyframes scoreFill { from { transform: scaleX(0); opacity: .4; } to { transform: scaleX(1); opacity: 1; } }
+
+/* Graphique de vitesse et jauges ajoutés comme éléments visuels */
+.velocity-visual { width: 100%; max-width: 760px; margin: 1.7rem auto 0; padding: 12px 16px 6px; border: 1px solid rgba(255,255,255,.08); border-radius: 16px; background: linear-gradient(145deg, rgba(255,255,255,.045), rgba(0,0,0,.12)); }
+.velocity-visual svg { display: block; width: 100%; height: auto; overflow: visible; }
+.velocity-visual .curve { fill: none; stroke: url(#velocityGradient); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 820; stroke-dashoffset: 820; filter: drop-shadow(0 0 7px rgba(255,102,30,.55)); }
+.slide.is-visible .velocity-visual .curve { animation: drawCurve 1.7s .2s ease-out forwards; }
+@keyframes drawCurve { to { stroke-dashoffset: 0; } }
+.ratio-track { height: 5px; margin-top: 1.1rem; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.09); }
+.ratio-track i { display: block; width: var(--meter, 0%); height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--accent-orange), var(--accent-amber), var(--accent-cyan)); box-shadow: 0 0 12px rgba(255,85,0,.35); transform: scaleX(.02); transform-origin: left; transition: transform 1.15s cubic-bezier(.18,.75,.2,1) .18s; }
+.slide.is-visible .ratio-track i { transform: scaleX(1); }
+
+/* Fallback visuel pour les images non fournies avec le HTML */
+.asset-fallback {
+  position: relative;
+  display: flex;
+  min-height: 190px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: .8rem 0;
+  padding: 2rem;
+  overflow: hidden;
+  border: 1px dashed rgba(255,129,62,.36);
+  border-radius: 17px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(255,85,0,.13), transparent 62%), linear-gradient(145deg, rgba(255,255,255,.035), rgba(0,0,0,.2));
+  text-align: center;
+}
+.asset-fallback::before, .asset-fallback::after { position: absolute; content: ''; width: 58%; height: 1px; background: linear-gradient(90deg, transparent, rgba(0,210,255,.45), transparent); transform: rotate(-18deg); }
+.asset-fallback::before { top: 36%; left: -8%; }
+.asset-fallback::after { right: -8%; bottom: 30%; transform: rotate(18deg); }
+.asset-fallback span { color: var(--accent-orange); font: 600 9px var(--mono); letter-spacing: .2em; }
+.asset-fallback strong { color: #DCE3EC; font: 600 1rem var(--display); }
+.asset-fallback small { color: #788495; font: 500 10px var(--mono); }
+
+/* Reveal en cascade */
+.js-ready .slide:not(.is-visible) .glass-card,
+.js-ready .slide:not(.is-visible) > h2,
+.js-ready .slide:not(.is-visible) > .hero-title,
+.js-ready .slide:not(.is-visible) > .hero-subtitle,
+.js-ready .slide:not(.is-visible) > p,
+.js-ready .slide:not(.is-visible) .flow-step,
+.js-ready .slide:not(.is-visible) .timeline-node { opacity: 0; transform: translate3d(0, 22px, 0); filter: blur(7px); }
+.slide.is-visible .glass-card,
+.slide.is-visible > h2,
+.slide.is-visible > .hero-title,
+.slide.is-visible > .hero-subtitle,
+.slide.is-visible > p,
+.slide.is-visible .flow-step,
+.slide.is-visible .timeline-node { opacity: 1; filter: blur(0); }
+
+/* Responsive */
+@media (max-width: 1000px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  .slide { padding: 7.2rem 5.5% 6rem; }
+  h2 { font-size: clamp(1.85rem, 6vw, 3rem); }
+  .hero-title { font-size: clamp(3.5rem, 13vw, 6rem); }
+  .timeline-container { flex-direction: column; gap: 1.5rem; }
+  .timeline-container::before { display: none; }
+  .flow-row { align-items: stretch; flex-direction: column; }
+  .flow-arrow { align-self: center; transform: rotate(90deg); }
+  .flow-step { min-height: 58px; }
+  .slide#slide1 > .glass-card { max-height: 40vh; }
+  .slide#slide1 > .glass-card .premium-img { max-height: 36vh; }
+}
+@media (max-width: 600px) {
+  .topbar { top: 10px; left: 10px; right: 10px; }
+  .brand-mark { width: 36px; height: 36px; border-radius: 11px; }
+  .brand-copy strong { font-size: 9px; }
+  .brand-copy small { font-size: 7px; }
+  .status-pill { display: none; }
+  .counter-pill { padding: 8px 9px; font-size: 9px; }
+  #menuToggle { width: 38px; height: 38px; }
+  .side-panel { top: 60px; left: 10px; width: calc(100vw - 20px); max-height: 69vh; }
+  #slideNav { max-height: calc(69vh - 66px); }
+  .slide { min-height: 100svh; padding: 6.3rem 1.1rem 6.2rem; }
+  .slide-number { top: 5rem; right: 1rem; font-size: 6rem; }
+  .glass-card { border-radius: 18px; padding: 1.1rem; }
+  .formula { font-size: .95rem; padding: .75rem .85rem; overflow-wrap: anywhere; }
+  p, li { font-size: .94rem; }
+  .bottom-nav { right: 10px; bottom: 10px; gap: 6px; padding: 6px; }
+  .bottom-nav .nav-arrow { width: 34px; height: 34px; }
+  .bottom-nav-copy { min-width: 88px; }
+  .bottom-nav-copy strong { max-width: 100px; }
+  .matrix-table th, .matrix-table td { padding: .72rem .55rem; font-size: .83rem; }
+  .premium-img, .gantt-img { max-height: 38vh; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  #ambientCanvas { display: none; }
+}
+</style>
+
+    <meta name="theme-color" content="#090A0F">
+    <meta name="description" content="Dragster motorisé — dossier technique interactif.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+
+    <canvas id="ambientCanvas" aria-hidden="true"></canvas>
+    <div class="top-progress" aria-hidden="true"><span id="progressBar"></span></div>
+    <header class="topbar" aria-label="Navigation de la présentation">
+        <div class="brand-lockup">
+            <button id="menuToggle" type="button" aria-label="Ouvrir le sommaire" aria-expanded="false" aria-controls="sidePanel">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            <div class="brand-mark" aria-hidden="true">DM</div>
+            <div class="brand-copy"><strong>DRAGSTER MOTORISÉ</strong><small>DOSSIER TECHNIQUE / PREMIUM</small></div>
+        </div>
+        <div class="topbar-right">
+            <div class="status-pill"><span class="status-dot"></span> ENGINEERING MODE</div>
+            <div class="counter-pill"><span id="slideCounter">01 / 38</span></div>
+        </div>
+    </header>
+    <aside class="side-panel" id="sidePanel" aria-label="Sommaire des diapositives" aria-hidden="true">
+        <div class="panel-heading"><span>INDEX DU DOSSIER</span><span>38 SECTIONS</span></div>
+        <nav id="slideNav"></nav>
+    </aside>
+    <div class="bottom-nav" aria-label="Navigation entre les diapositives">
+        <button class="nav-arrow" id="prevSlide" type="button" aria-label="Diapositive précédente" title="Précédent">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <div class="bottom-nav-copy"><strong id="activeSlideTitle">Dossier technique</strong><small>FLÈCHES · MOLETTE · SWIPE</small></div>
+        <button class="nav-arrow" id="nextSlide" type="button" aria-label="Diapositive suivante" title="Suivant">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+    </div>
+
+
+    <!-- SLIDE 1 : TITRE -->
+    <section class="slide" id="slide1">
+        <span class="slide-number">01</span>
+        <div class="hero-subtitle">Dossier Technique Premium</div>
+        <h1 class="hero-title">DRAGSTER<br>MOTORISÉ</h1>
+        <p style="font-size: 1.4rem; margin: 1.5rem 0;">Conçu pour gagner · Noah & Mathys</p>
+        <div class="glass-card" style="padding: 1rem;">
+            <img src="dragster_base.png" alt="Dragster" class="premium-img" style="margin: 0;">
+        </div>
+    </section>
+
+    <!-- SLIDE 2 : RÈGLES -->
+    <section class="slide" id="slide2">
+        <span class="slide-number">02</span>
+        <h2>Le Projet & Règles</h2>
+        <div class="glass-card">
+            <p>Le projet consiste à fabriquer un dragster motorisé pour faire des courses en duel sur une piste de quatre à douze mètres.</p>
+            <p style="margin-top: 1rem;">Le règlement dit que le départ se fait à l'arrêt et qu'on doit juste lâcher le dragster sans l'aider. Le premier qui passe la ligne gagne un point pour son équipe. Si on sort de la piste avant la ligne on perd la manche et si les deux sortent celui qui est allé le plus loin gagne un demi point.</p>
+            <div class="highlight-box">
+                <strong>Gagner c'est franchir la ligne avant l'adversaire</strong> sans sortir de la piste, sans aide extérieure et avec un système embarqué conforme.
+            </div>
+            <p><strong>Répartition des rôles :</strong> chef de projet, aérodynamique, transmission, châssis et programmation.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 3 : AÉRODYNAMISME -->
+    <section class="slide" id="slide3">
+        <span class="slide-number">03</span>
+        <h2>L'Aérodynamisme</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Comprendre la Résistance</h3>
+                <div class="formula">F_D = 1/2 ρ · C_D · S · v²</div>
+                <p>La traînée s'oppose au mouvement. Elle augmente très vite avec la vitesse : doubler v multiplie l'effet aérodynamique par quatre. Pour la réduire, on agit sur la surface frontale S et sur la qualité de forme Cd.</p>
+                <p style="margin-top: 1rem;">L'air crée une force qui s'appelle la traînée et cette force augmente avec le carré de la vitesse. Réduire cette force permet donc d'aller plus vite ou de consommer moins.</p>
+            </div>
+            <div class="glass-card">
+                <img src="aero.png" alt="Aérodynamisme" class="premium-img">
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 4 : FORME CARROSSERIE -->
+    <section class="slide" id="slide4">
+        <span class="slide-number">04</span>
+        <h2>Carrosserie</h2>
+        <div class="glass-card">
+            <p>La forme idéale pour réduire la traînée c'est une forme de poisson ou d'œuf, on l'appelle ovoïde ou pisciforme. Il faut aussi une petite surface frontale et éviter les vis ou les angles qui dépassent car ça crée des turbulences.</p>
+            <div class="grid-2" style="margin-top: 2rem;">
+                <div class="schema-box" style="border-color: var(--success-green);">
+                    <h4 style="color: var(--success-green);">OVOÏDE</h4>
+                    <p>Écoulement progressif<br>Sillage réduit</p>
+                </div>
+                <div class="schema-box" style="border-color: var(--danger-red);">
+                    <h4 style="color: var(--danger-red);">ANGULEUSE</h4>
+                    <p>Séparations d'écoulement<br>Turbulences</p>
+                </div>
+            </div>
+            <div class="highlight-box">
+                <strong>Choix pour notre dragster :</strong> nez arrondi, section frontale contenue, arrière effilé sans compromettre le châssis ni les roues.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 5 : SOUFFLERIE ET CFD -->
+    <section class="slide" id="slide5">
+        <span class="slide-number">05</span>
+        <h2>Tests Aérodynamiques</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Soufflerie</h3>
+                <p>On utilise une soufflerie qui envoie un vent artificiel sur une maquette immobile et un dynamomètre mesure la force de l'air. Observer les filets d'air, comparer les formes, mesurer une force.</p>
+            </div>
+            <div class="glass-card">
+                <h3>CFD (Simulation)</h3>
+                <p>Logiciels de simulation numérique appelés CFD qui calculent l'écoulement de l'air autour de la forme sans avoir besoin de fabriquer la maquette. Cartographier pression et vitesse, tester vite plusieurs variantes.</p>
+            </div>
+        </div>
+        <div class="glass-card" style="margin-top: 1.5rem; padding: 1rem;">
+            <img src="wind_tunnel.png" alt="Soufflerie et CFD" class="premium-img" style="margin: 0;">
+        </div>
+    </section>
+
+    <!-- SLIDE 6 : TRANSMISSION -->
+    <section class="slide" id="slide6">
+        <span class="slide-number">06</span>
+        <h2>Transmission</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <div class="formula">n₂ / n₁ = D₁ / D₂</div>
+                <p>La courroie transmet la rotation du moteur vers l'axe des roues. Sans glissement, la vitesse linéaire de la courroie est identique sur les deux poulies. Une petite poulie menée tourne plus vite ; une grande augmente le couple disponible.</p>
+                <p style="margin-top: 1rem;">Le rapport de transmission c'est le diamètre de la poulie motrice divisé par le diamètre de la poulie réceptrice. Si le rapport < 1 c'est un réducteur (vitesse baisse, couple augmente). Si > 1 c'est un multiplicateur (vitesse augmente, couple baisse).</p>
+            </div>
+            <div class="glass-card" style="padding: 1rem;">
+                <img src="transmission.png" alt="Transmission" class="premium-img" style="margin: 0;">
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 7 : DIAMÈTRES -->
+    <section class="slide" id="slide7">
+        <span class="slide-number">07</span>
+        <h2>Diamètres</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Impact</h3>
+                <p><strong>ROUE ↑ :</strong> Vitesse au sol ↑, couple à la roue ↓.</p>
+                <p><strong>POULIE MENÉE ↓ :</strong> Rotation roue ↑, effort transmis ↓.</p>
+                <p><strong>POULIE MENÉE ↑ :</strong> Couple roue ↑, vitesse max ↓.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Explication</h3>
+                <p>Une grande roue permet d'aller plus vite en pointe car elle fait plus de distance à chaque tour mais réduit l'accélération. Une petite roue accélère plus vite mais va moins vite en pointe.</p>
+                <p style="margin-top: 1rem;">Le bon choix dépend aussi de la masse, de l'adhérence et de la courbe couple-vitesse du moteur.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 8 : CONFIGURATIONS -->
+    <section class="slide" id="slide8">
+        <span class="slide-number">08</span>
+        <h2>Configurations</h2>
+        <div class="grid-2">
+            <div class="glass-card" style="border-top: 4px solid var(--accent-orange);">
+                <h3>Orientée Vitesse</h3>
+                <p>Grande poulie moteur avec petite roue. Super vitesse de pointe mais très peu de couple au démarrage donc le dragster va patiner. Intéressante sur piste longue.</p>
+            </div>
+            <div class="glass-card" style="border-top: 4px solid var(--success-green);">
+                <h3>Orientée Couple</h3>
+                <p>Petite poulie moteur avec grande roue. Beaucoup de couple pour démarrer très fort mais vitesse de pointe très limitée. Moins sensible à la charge.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 9 : RAPPORT OPTIMAL -->
+    <section class="slide" id="slide9">
+        <span class="slide-number">09</span>
+        <h2>Rapport Optimal</h2>
+        <div class="glass-card">
+            <p>Pour un dragster il faut trouver le bon compromis entre le couple pour démarrer sans patiner et la vitesse pour finir la piste le plus vite possible. Le choix dépend des poulies et des roues fournies dans le kit.</p>
+            <div class="flow-row">
+                <div class="flow-step">1. CHOISIR<br><small>3 rapports plausibles</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">2. MESURER<br><small>Temps sur même piste</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">3. OBSERVER<br><small>Patinage, stabilité</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="border-color: var(--accent-orange);">4. RETENIR<br><small>Meilleur compromis</small></div>
+            </div>
+            <p style="margin-top: 1rem;">Une seule variable change à la fois. Même batterie, même masse, même piste et plusieurs répétitions : on compare alors des configurations, pas des conditions d'essai.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 10 : PUISSANCE MÉCANIQUE -->
+    <section class="slide" id="slide10">
+        <span class="slide-number">10</span>
+        <h2>Puissance Mécanique</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Rotation</h3>
+                <div class="formula">P = C · ω</div>
+                <p>Couple C [N·m] · Vitesse angulaire ω [rad·s⁻¹]. La puissance de rotation c'est le couple multiplié par la vitesse de rotation. Elle représente la puissance qui sort du moteur et qui tourne.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Translation</h3>
+                <div class="formula">P = F · v</div>
+                <p>Force F [N] · Vitesse v [m·s⁻¹]. La puissance de translation c'est la force multipliée par la vitesse linéaire. Elle représente la puissance nécessaire pour faire avancer le véhicule.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 11 : MOTEUR D21 -->
+    <section class="slide" id="slide11">
+        <span class="slide-number">11</span>
+        <h2>Moteur D21</h2>
+        <div class="glass-card">
+            <div class="flow-row">
+                <div class="flow-step">Relever n<br><small>[tr·min⁻¹]</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Convertir<br><small>ω = 2πn / 60</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Mesurer C<br><small>[N·m]</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="background: rgba(255,107,0,0.2);">Calculer<br><small>Pm = C · ω</small></div>
+            </div>
+            <p style="margin-top: 1.5rem;">D'après la fiche technique du moteur D21 il tourne à dix mille cinq cents tours par minute avec un couple de onze grammes centimètre. Si on convertit le couple en newtons-mètres et la vitesse en radians par seconde on trouve une puissance mécanique d'environ <strong>1,18 W</strong>.</p>
+            <p style="margin-top: 0.5rem;">C'est une valeur théorique qui dépend de la charge réelle sur la piste.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 12 : FROTTEMENT -->
+    <section class="slide" id="slide12">
+        <span class="slide-number">12</span>
+        <h2>Frottement</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <div class="formula">|F_t| ≤ μ · N</div>
+                <p>Le frottement permet de transmettre l'effort mais provoque aussi des pertes. L'adhérence disponible dépend du coefficient μ, des matériaux, de l'état des surfaces et de l'effort normal N.</p>
+                <p style="margin-top: 1rem;">On le modélise avec un cône de frottement qui donne un angle et un coefficient de frottement. Les facteurs qui influencent c'est la nature des matériaux, la rugosité des surfaces, la force qui appuie dessus et la présence de lubrifiant.</p>
+            </div>
+            <div class="glass-card" style="padding: 1rem;">
+                <img src="friction.png" alt="Cône de frottement" class="premium-img" style="margin: 0;">
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 13 : PATINAGE -->
+    <section class="slide" id="slide13">
+        <span class="slide-number">13</span>
+        <h2>Patinage</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Roue ↔ Sol</h3>
+                <p>Couple trop élevé · charge faible · surface lisse. Pour la roue le patinage arrive quand le moteur pousse plus fort que ce que le pneu peut accrocher au sol.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Courroie ↔ Poulie</h3>
+                <p>Tension insuffisante · faible enroulement · usure. Pour la courroie le patinage arrive si elle n'est pas assez tendue ou si le couple est trop grand pour l'adhérence.</p>
+            </div>
+        </div>
+        <div class="glass-card" style="margin-top: 1.5rem; padding: 1rem;">
+            <img src="slip.png" alt="Patinage" class="premium-img" style="margin: 0;">
+        </div>
+    </section>
+
+    <!-- SLIDE 14 : CONSÉQUENCES PATINAGE -->
+    <section class="slide" id="slide14">
+        <span class="slide-number">14</span>
+        <h2>Conséquences</h2>
+        <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; margin-bottom: 2rem; color: var(--danger-red);">Tourner plus vite ≠ avancer plus vite.</h3>
+            <div class="flow-row">
+                <div class="flow-step" style="background: rgba(255, 107, 0, 0.15);"><strong>GLISSEMENT</strong></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><strong>ÉNERGIE PERDUE</strong><br><small>en chaleur</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><strong>ACCÉLÉRATION RÉDUITE</strong></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step"><strong>USURE +</strong><br><small>trajectoire instable</small></div>
+            </div>
+            <p style="margin-top: 2rem; text-align: left;">Au démarrage si la roue patine on perd de l'énergie et du temps le dragster n'avance pas comme il devrait. Si la courroie patine la puissance du moteur n'arrive pas bien aux roues et on perd de la vitesse. À haute vitesse une courroie mal tendue peut vibrer ou sauter et casser la transmission.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 15 : CHÂSSIS -->
+    <section class="slide" id="slide15">
+        <span class="slide-number">15</span>
+        <h2>Le Châssis</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <div class="highlight-box">
+                    <strong>RIGIDE • LÉGER • ALIGNÉ</strong>
+                </div>
+                <p>Le châssis ferme la chaîne des efforts. Il doit rester rigide sans être lourd, maintenir les axes parallèles, placer les masses bas et centrées, et éviter toute flexion qui ferait dévier le dragster.</p>
+                <p style="margin-top: 1rem;">Les efforts principaux sont le poids du dragster, la réaction du sol, la force de traction du moteur et la résistance de l'air. Pour bien les gérer il faut un châssis très rigide qui ne se déforme pas en torsion ou en flexion. Il faut aussi bien aligner les axes des roues pour que le dragster roule bien droit.</p>
+            </div>
+            <div class="glass-card" style="padding: 1rem;">
+                <img src="chassis.png" alt="Efforts sur le châssis" class="premium-img" style="margin: 0;">
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 16 : GUIDAGE -->
+    <section class="slide" id="slide16">
+        <span class="slide-number">16</span>
+        <h2>Guidage</h2>
+        <div class="grid-3">
+            <div class="glass-card">
+                <h3>Palier Lisse</h3>
+                <p>Simple, économique, plus de frottement (bagues plastique/métal).</p>
+            </div>
+            <div class="glass-card" style="border: 2px solid var(--accent-orange); background: rgba(255,107,0,0.05); padding: 1rem;">
+                <img src="bearing.png" alt="Roulement" class="premium-img" style="margin-top:0; margin-bottom: 1rem;">
+                <h3 style="color: var(--accent-orange); text-align: center;">Roulement</h3>
+                <p style="text-align: center;">Faible frottement, bon alignement, montage précis. La meilleure solution : réduit énormément les frottements et supporte bien les charges.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Axe Direct</h3>
+                <p>Léger, mais usure et jeu plus sensibles.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 17 : CARTE DGB -->
+    <section class="slide" id="slide17">
+        <span class="slide-number">17</span>
+        <h2>Carte DGB</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <p>C'est le contrôleur du moteur. Elle permet de piloter le moteur dans les deux sens et de régler la vitesse avec un signal PWM. Elle peut aussi freiner le moteur ou le laisser en roue libre.</p>
+                <p style="margin-top: 1rem;">Elle a un capteur de lumière LDR pour démarrer automatiquement avec une lampe et une sortie pour un servomoteur. Elle peut aussi communiquer en Bluetooth.</p>
+            </div>
+            <div class="glass-card" style="padding: 1rem;">
+                <img src="dgb.png" alt="Carte DGB" class="premium-img" style="margin: 0;">
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 18 : PROGRAMMATION -->
+    <section class="slide" id="slide18">
+        <span class="slide-number">18</span>
+        <h2>Programmation</h2>
+        <div class="glass-card">
+            <div class="flow-row">
+                <div class="flow-step">App Inventor<br><small>interface mobile</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Bluetooth<br><small>ordres sans fil</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="border-color: var(--accent-orange);">Blockly + DGB<br><small>logique embarquée</small></div>
+            </div>
+            <p style="margin-top: 1.5rem;">L'application envoie une consigne. La carte la reçoit, exécute le programme Blockly et module le moteur. Les rôles restent distincts : interface, communication, décision, action.</p>
+            <p style="margin-top: 1rem;">On utilise le logiciel Blockly qui permet de faire de la programmation par blocs, c'est facile à prendre en main. On peut aussi utiliser App Inventor 2 pour créer une application sur un téléphone ou une tablette et piloter le dragster à distance avec le Bluetooth.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 19 : LOI DE VITESSE -->
+    <section class="slide" id="slide19">
+        <span class="slide-number">19</span>
+        <h2>Loi Trapézoïdale</h2>
+        <div class="glass-card">
+            <p>C'est un profil de vitesse qui se décompose en trois phases : d'abord une phase d'accélération où la vitesse augmente doucement, ensuite une phase de vitesse constante où on reste à fond, et enfin une phase de décélération où la vitesse baisse doucement. Ça permet d'éviter les à-coups et de ne pas faire patiner les roues au démarrage.</p>
+            <div class="timeline-container">
+                <div class="timeline-node"><div class="timeline-dot">1</div><p><strong>ACCÉLÉRER</strong><br>La vitesse augmente.</p></div>
+                <div class="timeline-node"><div class="timeline-dot">2</div><p><strong>MAINTENIR</strong><br>Vitesse constante.</p></div>
+                <div class="timeline-node"><div class="timeline-dot">3</div><p><strong>DÉCÉLÉRER</strong><br>Arrêt maîtrisé.</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 20 : CALCULS LOI TRAPÉZOÏDALE -->
+    <section class="slide" id="slide20">
+        <span class="slide-number">20</span>
+        <h2>Calculs Trapèze</h2>
+        <div class="glass-card">
+            <div class="grid-2">
+                <div>
+                    <div class="formula">t_a = V_max / a</div>
+                    <div class="formula">d_a = 1/2 · a · t_a²</div>
+                </div>
+                <div>
+                    <div class="formula">d_p = d - d_a - d_f</div>
+                    <div class="formula">t_p = d_p / V_max</div>
+                </div>
+            </div>
+            <p style="margin-top: 1.5rem;">La durée d'accélération c'est la vitesse maximale divisée par l'accélération. La distance parcourue pendant l'accélération c'est un demi de l'accélération multipliée par le temps d'accélération au carré. La distance totale parcourue c'est la distance d'accélération plus la distance à vitesse constante plus la distance de décélération.</p>
+            <div class="highlight-box">
+                <strong>Si la distance est trop courte</strong> pour atteindre Vmax, le profil devient triangulaire : accélération puis décélération, sans palier.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 21 : TRADUIRE EN BLOCKLY -->
+    <section class="slide" id="slide21">
+        <span class="slide-number">21</span>
+        <h2>Blockly</h2>
+        <div class="glass-card">
+            <div class="flow-row" style="flex-wrap: nowrap; overflow-x: auto; padding-bottom: 1rem;">
+                <div class="flow-step" style="min-width: 140px;">INITIALISER<br><small>PWM = 0</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="min-width: 140px; border-color: var(--accent-orange);">BOUCLE RAMPE<br><small>PWM += pas</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="min-width: 140px;">PALIER<br><small>PWM constant</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="min-width: 140px; border-color: var(--accent-orange);">RAMPE BASSE<br><small>PWM -= pas</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="min-width: 140px;">ARRÊTER<br><small>PWM = 0</small></div>
+            </div>
+            <p style="margin-top: 1.5rem;">Chaque pas est séparé par une temporisation. Le programme envoie donc une consigne progressive à la carte DGB au lieu d'un échelon brutal.</p>
+            <p style="margin-top: 1rem;">On utilise des boucles dans Blockly pour augmenter petit à petit la valeur du rapport cyclique de zéro jusqu'à quatre cents pour accélérer. On met des blocs attendre pour gérer la durée. Ensuite on maintient la valeur quatre cents pour la vitesse constante puis on fait l'inverse pour décélérer jusqu'à zéro.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 22 : PUISSANCE ÉLECTRIQUE -->
+    <section class="slide" id="slide22">
+        <span class="slide-number">22</span>
+        <h2>Puissance Électrique</h2>
+        <div class="glass-card">
+            <div class="flow-row">
+                <div class="flow-step">BATTERIE<br><small>U · I</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="border-color: var(--accent-orange);">PWM<br><small>Ū ≈ α · U</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">MOTEUR<br><small>rotation</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">TRANSMISSION<br><small>roues</small></div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">DRAGSTER<br><small>translation</small></div>
+            </div>
+            <div class="formula" style="margin: 1.5rem auto; display: block; text-align: center; max-width: 400px;">P_e = U · I → P_m = C · ω</div>
+            <p>Optimiser, c'est accorder commande, moteur, transmission, adhérence, châssis et aérodynamisme toute la chaîne d'énergie.</p>
+            <p style="margin-top: 1rem;">La puissance électrique c'est la tension multipliée par l'intensité. La carte est alimentée par trois piles soit quatre virgule cinq volts. Le rapport cyclique du signal PWM fait varier la tension moyenne envoyée au moteur. Donc plus le rapport cyclique est élevé plus la puissance électrique envoyée au moteur est grande et plus il tourne vite.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 23 : DIAGRAMME DE GANTT (IMAGE) -->
+    <section class="slide" id="slide23">
+        <span class="slide-number">23</span>
+        <h2>Diagramme de Gantt</h2>
+        <div class="glass-card" style="padding: 1rem;">
+            <!-- Remplacement de l'iframe par l'image fournie -->
+            <img src="gantt.png" alt="Diagramme de Gantt" class="gantt-img">
+        </div>
+    </section>
+
+    <!-- SLIDE 24 : PRÉSENTATION ÉQUIPE -->
+    <section class="slide" id="slide24">
+        <span class="slide-number">24</span>
+        <h2>L'Équipe</h2>
+        <div class="glass-card" style="text-align: center;">
+            <h3 style="font-size: 2rem; margin-bottom: 1rem;">Chef de projet : Noah</h3>
+            <p style="font-size: 1.5rem; margin-bottom: 2rem;">Élèves : Noah & Mathys</p>
+            <div class="schema-box" style="max-width: 600px; margin: 0 auto; border-color: var(--accent-cyan); padding: 1rem;">
+                <img src="dragster_base.png" alt="Dragster de l'équipe" class="premium-img" style="margin: 0;">
+                <p style="color: var(--accent-cyan); font-weight: bold; font-size: 1.2rem; margin-top: 1rem;">CHÂSSIS • MOTEUR • POULIES • COURROIE</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 25 : ÉLÉMENTS TRANSMISSION -->
+    <section class="slide" id="slide25">
+        <span class="slide-number">25</span>
+        <h2>Éléments de Transmission</h2>
+        <div class="glass-card">
+            <p>Repérer sur le dessin les éléments qui permettent la transmission du mouvement du moteur aux roues arrière :</p>
+            <ul style="columns: 2; margin-top: 1rem; list-style-position: inside;">
+                <li>Moteur</li>
+                <li>Arbre moteur</li>
+                <li>Poulie moteur</li>
+                <li>Courroie</li>
+                <li>Poulie réceptrice</li>
+                <li>Arbre récepteur</li>
+                <li>Roue</li>
+            </ul>
+            <div class="highlight-box">
+                <strong>Sens de rotation :</strong> Dans quel sens le moteur doit-il tourner pour entraîner les roues arrière dans le bon sens ? Indiquer le sens de rotation du moteur par une flèche. (Le moteur doit tourner dans le sens qui tire la courroie vers l'arrière).
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 26 : RÉPARTITION DES RÔLES -->
+    <section class="slide" id="slide26">
+        <span class="slide-number">26</span>
+        <h2>Répartition des Rôles</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>1. TEMPS 1 : IMPLANTATION</h3>
+                <p>Meneur : Noah<br>Participant : Mathys</p>
+            </div>
+            <div class="glass-card">
+                <h3>2. TEMPS 2 : PROPULSION</h3>
+                <p>Meneur : Mathys<br>Participant : Noah</p>
+            </div>
+            <div class="glass-card">
+                <h3>3. TEMPS 3 : ESSIEU AVANT</h3>
+                <p>Meneur : [À définir]<br>Participant : [À définir]</p>
+            </div>
+            <div class="glass-card">
+                <h3>4. TEMPS 4 : CARROSSERIE</h3>
+                <p>Meneur : [À définir]<br>Participant : [À définir]</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 27 : OBJECTIFS ET DÉMARCHE -->
+    <section class="slide" id="slide27">
+        <span class="slide-number">27</span>
+        <h2>Objectifs & Démarche</h2>
+        <div class="glass-card">
+            <p><strong>Objectif :</strong> décrire une solution, identifier un problème technique, proposer des solutions et justifier le choix retenu.</p>
+            <div class="timeline-container" style="margin-top: 3rem;">
+                <div class="timeline-node"><div class="timeline-dot">1</div><p>ANALYSE<br><small>du besoin</small></p></div>
+                <div class="timeline-node"><div class="timeline-dot">2</div><p>CAHIER<br><small>des charges</small></p></div>
+                <div class="timeline-node"><div class="timeline-dot">3</div><p>CRÉATIVITÉ</p></div>
+                <div class="timeline-node"><div class="timeline-dot">4</div><p>CHOIX</p></div>
+                <div class="timeline-node"><div class="timeline-dot">5</div><p>CONCEPTION</p></div>
+                <div class="timeline-node"><div class="timeline-dot">6</div><p>TESTS</p></div>
+            </div>
+            <p style="margin-top: 2rem; text-align: center;">Chaque décision doit être expliquée et appuyée par un croquis, un calcul ou un critère mesurable.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 28 : ANALYSE M.E.I -->
+    <section class="slide" id="slide28">
+        <span class="slide-number">28</span>
+        <h2>Analyse M.E.I</h2>
+        <div class="grid-3">
+            <div class="glass-card" style="border-top: 4px solid var(--blue-tech);">
+                <h3>MATIÈRE</h3>
+                <p>Châssis en PVC 6 mm, roues en ABS, bandages élastiques, axes en acier 3 mm, carrosserie en polypropylène.</p>
+            </div>
+            <div class="glass-card" style="border-top: 4px solid var(--accent-orange);">
+                <h3>ÉNERGIE</h3>
+                <p>3 piles R6, interrupteur, moteur, poulie moteur, courroie, poulie réceptrice 34 mm, roues arrière.</p>
+            </div>
+            <div class="glass-card" style="border-top: 4px solid var(--purple-tech);">
+                <h3>INFORMATION</h3>
+                <p>Commande marche/arrêt par interrupteur et réglages mécaniques de la transmission.</p>
+            </div>
+        </div>
+        <div class="glass-card" style="margin-top: 1.5rem;">
+            <h3>Dimensions</h3>
+            <p>Moteur : largeur 21 mm, longueur 33 mm (soit 21+5+7). Boîtier piles : largeur 47 mm, hauteur 14,8 mm, longueur 57,8 mm. <em>(Attention : le document indique 470 148 578 mais c'est une erreur d'unité, ce sont des millimètres).</em> Châssis PVC : 50 mm par 200 mm.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 29 : CAHIER DES CHARGES -->
+    <section class="slide" id="slide29">
+        <span class="slide-number">29</span>
+        <h2>Cahier des Charges</h2>
+        <div class="glass-card">
+            <h3>Le dragster doit :</h3>
+            <div class="grid-2" style="margin-top: 1rem;">
+                <div>
+                    <ul style="list-style-type: '✓ '; padding-left: 1rem;">
+                        <li>Aller en ligne droite</li>
+                        <li>Démarrer rapidement</li>
+                        <li>Atteindre une bonne vitesse</li>
+                        <li>Rester stable et adhérer à la piste</li>
+                    </ul>
+                </div>
+                <div>
+                    <ul style="list-style-type: '✓ '; padding-left: 1rem;">
+                        <li>Être simple à fabriquer</li>
+                        <li>Résister aux vibrations</li>
+                        <li>Présenter une carrosserie aérodynamique</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="highlight-box">
+                La solution doit rester compatible avec les pièces et dimensions du kit.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 30 : TEMPS 1 IMPLANTATION -->
+    <section class="slide" id="slide30">
+        <span class="slide-number">30</span>
+        <h2>Temps 1 : Implantation</h2>
+        <div class="glass-card">
+            <p><strong>Durée :</strong> 30 minutes · <strong>Méthode :</strong> brainstorming</p>
+            <p style="margin-top: 0.5rem;"><strong>Objectif :</strong> Présenter un croquis abouti de l'implantation.</p>
+            <h4 style="color: var(--accent-orange); margin-top: 1.5rem;">Contraintes à respecter :</h4>
+            <ul style="list-style-position: inside; margin-top: 0.5rem;">
+                <li>Échelle et volumes disponibles</li>
+                <li>Centre de gravité bas et maîtrisé</li>
+                <li>Accès à l'interrupteur</li>
+                <li>Passage des câbles sans contact avec les roues ou la courroie</li>
+            </ul>
+            <div class="highlight-box" style="margin-top: 1.5rem;">
+                <strong>Solution retenue :</strong> masses basses et centrées, moteur à l'arrière, piles au milieu.<br>
+                <strong>Justification :</strong> le centre de gravité bas et légèrement arrière charge les roues motrices sans écraser l'avant.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 31 : IDÉES D'IMPLANTATION -->
+    <section class="slide" id="slide31">
+        <span class="slide-number">31</span>
+        <h2>Idées d'Implantation</h2>
+        <div class="grid-3">
+            <div class="glass-card">
+                <h3>A • SIMPLICITÉ</h3>
+                <p>Piles au centre, moteur à l'arrière.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--success-green);">+ Montage simple</p>
+                <p style="font-size: 0.9rem; color: var(--danger-red);">- Centre de gravité potentiellement trop haut</p>
+            </div>
+            <div class="glass-card">
+                <h3>B • MASSE ARRIÈRE</h3>
+                <p>Tous les éléments à l'arrière.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--success-green);">+ Charge importante sur les roues motrices</p>
+                <p style="font-size: 0.9rem; color: var(--danger-red);">- Avant trop léger, risque de dérive</p>
+            </div>
+            <div class="glass-card" style="border: 2px solid var(--accent-orange); background: rgba(255,107,0,0.05);">
+                <h3 style="color: var(--accent-orange);">C • ÉQUILIBRE</h3>
+                <p>Masses basses et centrées. Piles au milieu, moteur reculé, câbles guidés.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: var(--accent-orange);">Choix favorisé : équilibre entre adhérence et stabilité.</p>
+            </div>
+        </div>
+        <div class="glass-card" style="margin-top: 1.5rem;">
+            <p><strong>Quelle poulie permet une rotation plus rapide des roues ?</strong> La plus grande, car plus la poulie moteur est grande plus la roue tourne vite.</p>
+            <p><strong>Quelle poulie permet une rotation plus lente ?</strong> La poulie plus petite, car le rapport de réduction est plus grand.</p>
+            <p style="margin-top: 0.5rem;"><strong>Conclusion :</strong> Plus la poulie moteur est grande, plus les roues tournent vite mais plus le couple baisse et le dragster a du mal à démarrer.</p>
+        </div>
+    </section>
+
+    <!-- SLIDE 32 : MATRICE DE DÉCISION -->
+    <section class="slide" id="slide32">
+        <span class="slide-number">32</span>
+        <h2>Matrice de Décision</h2>
+        <div class="glass-card">
+            <table class="matrix-table">
+                <thead>
+                    <tr>
+                        <th>Critères Pondérés</th>
+                        <th>Poids</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Équilibre</td><td>30 %</td></tr>
+                    <tr><td>Encombrement</td><td>20 %</td></tr>
+                    <tr><td>Accès aux composants</td><td>20 %</td></tr>
+                    <tr><td>Câblage</td><td>15 %</td></tr>
+                    <tr><td>Facilité de montage</td><td>15 %</td></tr>
+                </tbody>
+            </table>
+            <div class="highlight-box" style="margin-top: 2rem; text-align: center;">
+                <h3 style="color: var(--accent-orange); font-size: 1.8rem;">RÉSULTAT : L'idée C obtient la meilleure note 4,45 / 5.</h3>
+                <p style="margin-top: 0.5rem;"><strong>Décision :</strong> Implantation équilibrée, masses basses et centre de gravité légèrement en arrière.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 33 : CROQUIS ET MATÉRIAUX -->
+    <section class="slide" id="slide33">
+        <span class="slide-number">33</span>
+        <h2>Croquis & Matériaux</h2>
+        <div class="grid-2">
+            <div class="glass-card">
+                <h3>Croquis d'Implantation</h3>
+                <p>Le croquis repère le châssis, les piles, le moteur, l'interrupteur, les poulies, la courroie et les roues.</p>
+                <div class="schema-box" style="height: 150px; display: flex; align-items: center; justify-content: center; margin-top: 1rem;">
+                    <p style="color: var(--text-secondary);">[ LÉGENDE : G centre de gravité ]<br>Piles au milieu, moteur reculé, câbles guidés.</p>
+                </div>
+                <p style="margin-top: 1rem;"><strong>Justification :</strong> Le centre de gravité bas et légèrement arrière charge les roues motrices sans alléger excessivement l'avant. Les câbles restent éloignés de la courroie.</p>
+            </div>
+            <div class="glass-card">
+                <h3>Analyse des Matériaux</h3>
+                <p><strong>En quel matériau sont les roues ?</strong> En ABS.</p>
+                <p><strong>Ce matériau est-il adapté ?</strong> Non, l'ABS est dur et glisse.</p>
+                <p><strong>Quel matériau est mieux adapté ?</strong> Le caoutchouc ou un élastomère.</p>
+                <p style="margin-top: 1rem;"><strong>En quel matériau sont les bandages ?</strong> Des bracelets élastiques.</p>
+                <p><strong>Améliorent-ils les performances ?</strong> Oui, ils augmentent l'adhérence et évitent le patinage au démarrage.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 34 : TEMPS 2 PROPULSION (NOUVEAU) -->
+    <section class="slide" id="slide34">
+        <span class="slide-number">34</span>
+        <h2>Temps 2 : Propulsion</h2>
+        <div class="glass-card">
+            <p><strong>Durée :</strong> 30 minutes</p>
+            <p><strong>Objectif :</strong> choisir la meilleure stratégie poulies, courroie et roues.</p>
+            <div class="flow-row" style="margin-top: 2rem;">
+                <div class="flow-step">Moteur</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Poulie moteur</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Courroie</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step" style="border-color: var(--accent-cyan);">Poulie réceptrice 34 mm</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Axe arrière</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-step">Roues</div>
+            </div>
+            <div class="highlight-box" style="margin-top: 2rem;">
+                La transmission doit démarrer sans patiner tout en offrant une vitesse de pointe suffisante.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 35 : TEMPS 2 CALCULS DÉTAILLÉS (NOUVEAU) -->
+    <section class="slide" id="slide35">
+        <span class="slide-number">35</span>
+        <h2>Calculs Détaillés</h2>
+        <div class="glass-card">
+            <p style="margin-bottom: 1rem;"><strong>Données :</strong> moteur 13 000 tr/min • poulie réceptrice 34 mm.</p>
+            <div class="grid-3">
+                <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <h4 style="color: var(--accent-orange); margin-bottom: 1rem;">POULIE MOTEUR 4 mm</h4>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">4 ÷ 34 = 0,1176</p>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary); margin-top: 0.5rem;">13 000 × 0,1176 = 1 529 tr/min environ</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <h4 style="color: var(--accent-orange); margin-bottom: 1rem;">POULIE MOTEUR 10 mm</h4>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">10 ÷ 34 = 0,2941</p>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary); margin-top: 0.5rem;">13 000 ÷ 0,2941 = 3 824 tr/min environ</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <h4 style="color: var(--accent-orange); margin-bottom: 1rem;">POULIE MOTEUR 15 mm</h4>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary);">15 ÷ 34 = 0,4412</p>
+                    <p style="font-family: monospace; font-size: 1.1rem; color: var(--text-primary); margin-top: 0.5rem;">13 000 × 0,4412 = 5 735 tr/min environ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 36 : TEMPS 2 INTERPRÉTATION (NOUVEAU) -->
+    <section class="slide" id="slide36">
+        <span class="slide-number">36</span>
+        <h2>Interprétation</h2>
+        <div class="glass-card">
+            <p>Quand la poulie moteur augmente la vitesse de rotation théorique des roues augmente. En contrepartie le couple disponible aux roues diminue.</p>
+            <h4 style="color: var(--danger-red); margin-top: 1.5rem;">Conséquences possibles :</h4>
+            <ul style="list-style-type: '⚠ '; padding-left: 1rem; margin-top: 0.5rem; color: var(--text-primary);">
+                <li>Démarrage plus difficile</li>
+                <li>Temps d'accélération plus long</li>
+                <li>Risque de patinage des roues</li>
+            </ul>
+            <div class="highlight-box" style="margin-top: 1.5rem;">
+                La vitesse théorique ne suffit donc pas, il faut aussi vérifier l'adhérence et le comportement au départ.
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 37 : TEMPS 2 COMPARAISON (NOUVEAU) -->
+    <section class="slide" id="slide37">
+        <span class="slide-number">37</span>
+        <h2>Comparaison</h2>
+        <div class="grid-3">
+            <div class="glass-card">
+                <h4 style="color: var(--text-secondary);">SOLUTION 1</h4>
+                <p style="font-size: 1.2rem; color: var(--text-primary); margin: 1rem 0;">Poulie moteur 4 mm + roue 44 mm</p>
+                <p style="color: var(--danger-red);">Couple important mais vitesse finale trop faible.</p>
+            </div>
+            <div class="glass-card">
+                <h4 style="color: var(--text-secondary);">SOLUTION 2</h4>
+                <p style="font-size: 1.2rem; color: var(--text-primary); margin: 1rem 0;">Poulie moteur 15 mm + roue 80 mm</p>
+                <p style="color: var(--danger-red);">Vitesse théorique élevée mais risque de patinage au démarrage.</p>
+            </div>
+            <div class="glass-card" style="border: 2px solid var(--success-green); background: rgba(63, 185, 80, 0.05);">
+                <h4 style="color: var(--success-green);">SOLUTION 3 — RETENUE</h4>
+                <p style="font-size: 1.2rem; color: var(--text-primary); margin: 1rem 0;">Poulie moteur 10 mm, poulie réceptrice 34 mm, roues arrière 60 mm avec bandage.</p>
+                <p style="color: var(--success-green);">Le dessin à droite représente le chemin de transmission.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SLIDE 38 : TEMPS 2 JUSTIFICATION (NOUVEAU) -->
+    <section class="slide" id="slide38">
+        <span class="slide-number">38</span>
+        <h2>Justification</h2>
+        <div class="glass-card">
+            <p>Le rapport 10 mm sur 34 mm avec une roue arrière de 60 mm offre un compromis entre accélération et vitesse de pointe. La roue de 60 mm avec bandage apporte de l'adhérence sans être excessivement lourde.</p>
+            
+            <h4 style="color: var(--accent-orange); margin-top: 2rem;">Points de vigilance :</h4>
+            <div class="grid-3" style="margin-top: 1rem;">
+                <div class="flow-step">Tension correcte<br><small>de la courroie</small></div>
+                <div class="flow-step">Alignement précis<br><small>des poulies</small></div>
+                <div class="flow-step">Axe arrière<br><small>libre en rotation</small></div>
+            </div>
+            <p style="margin-top: 1.5rem;">Ces réglages limitent le patinage et l'usure.</p>
+            
+            <div class="grid-3" style="margin-top: 2rem;">
+                <div class="highlight-box" style="margin: 0; text-align: center;">
+                    <strong>RAPPORT 10 / 34</strong><br>Compromis entre accélération et vitesse
+                </div>
+                <div class="highlight-box" style="margin: 0; text-align: center;">
+                    <strong>ROUE ARRIÈRE 60 mm</strong><br>Bandage pour améliorer l'adhérence
+                </div>
+                <div class="highlight-box" style="margin: 0; text-align: center;">
+                    <strong>RÉGLAGE FINAL</strong><br>Tension de courroie et poulies alignées
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+<script>
+(() => {
+  'use strict';
+  const slides = Array.from(document.querySelectorAll('section.slide'));
+  const total = slides.length;
+  const progressBar = document.getElementById('progressBar');
+  const counter = document.getElementById('slideCounter');
+  const activeTitle = document.getElementById('activeSlideTitle');
+  const nav = document.getElementById('slideNav');
+  const panel = document.getElementById('sidePanel');
+  const menuToggle = document.getElementById('menuToggle');
+  const prevButton = document.getElementById('prevSlide');
+  const nextButton = document.getElementById('nextSlide');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let activeIndex = 0;
+  let scrollRaf = 0;
+  let lastScrollY = window.scrollY;
+
+  if (!total) return;
+  document.documentElement.classList.add('js-ready');
+
+  const slideTitles = slides.map((slide, index) => {
+    const heading = slide.querySelector('h2');
+    return heading ? heading.textContent.trim().replace(/\s+/g, ' ') : (index === 0 ? 'Introduction' : `Section ${index + 1}`);
+  });
+
+  const navButtons = slides.map((slide, index) => {
+    slide.setAttribute('tabindex', '-1');
+    const button = document.createElement('button');
+    button.className = 'nav-item';
+    button.type = 'button';
+    button.innerHTML = `<span>${String(index + 1).padStart(2, '0')}</span><span></span>`;
+    button.children[1].textContent = slideTitles[index];
+    button.setAttribute('aria-label', `Aller à la diapositive ${index + 1} : ${slideTitles[index]}`);
+    button.addEventListener('click', () => goTo(index));
+    nav.appendChild(button);
+    return button;
+  });
+
+  function updateActive(index) {
+    activeIndex = Math.max(0, Math.min(total - 1, index));
+    counter.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+    activeTitle.textContent = slideTitles[activeIndex];
+    navButtons.forEach((button, i) => {
+      button.classList.toggle('active', i === activeIndex);
+      if (i === activeIndex) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
+    prevButton.disabled = activeIndex === 0;
+    nextButton.disabled = activeIndex === total - 1;
+  }
+
+  function goTo(index) {
+    const next = Math.max(0, Math.min(total - 1, index));
+    slides[next].scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    updateActive(next);
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden', 'true');
+    menuToggle.setAttribute('aria-expanded', 'false');
+  }
+
+  menuToggle.addEventListener('click', () => {
+    const open = !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    panel.setAttribute('aria-hidden', String(!open));
+    menuToggle.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('pointerdown', event => {
+    if (!panel.contains(event.target) && !menuToggle.contains(event.target) && panel.classList.contains('open')) {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+  prevButton.addEventListener('click', () => goTo(activeIndex - 1));
+  nextButton.addEventListener('click', () => goTo(activeIndex + 1));
+
+  document.addEventListener('keydown', event => {
+    const target = event.target;
+    const typing = target && (target.isContentEditable || /INPUT|TEXTAREA|SELECT|BUTTON/.test(target.tagName));
+    if (typing || event.altKey || event.ctrlKey || event.metaKey) return;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(event.key)) {
+      event.preventDefault(); goTo(activeIndex + 1);
+    } else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(event.key)) {
+      event.preventDefault(); goTo(activeIndex - 1);
+    } else if (event.key === 'Home') {
+      event.preventDefault(); goTo(0);
+    } else if (event.key === 'End') {
+      event.preventDefault(); goTo(total - 1);
+    } else if (event.key === 'Escape') {
+      panel.classList.remove('open');
+      panel.setAttribute('aria-hidden', 'true');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // Reveal des sections et synchronisation du sommaire.
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const index = slides.indexOf(entry.target);
+      if (index >= 0) {
+        updateActive(index);
+        entry.target.classList.add('is-visible');
+        animateSlide(entry.target);
+      }
+    });
+  }, { root: null, rootMargin: '-26% 0px -34% 0px', threshold: 0.08 });
+  slides.forEach(slide => observer.observe(slide));
+
+  const animatedSlides = new WeakSet();
+  function animateSlide(slide) {
+    if (animatedSlides.has(slide)) return;
+    animatedSlides.add(slide);
+    if (reducedMotion || !window.gsap) return;
+    const targets = slide.querySelectorAll(':scope > h2, :scope > .hero-subtitle, :scope > .hero-title, :scope > p, .glass-card, .flow-step, .timeline-node');
+    if (!targets.length) return;
+    window.gsap.fromTo(targets,
+      { autoAlpha: 0, y: 24, filter: 'blur(8px)' },
+      { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: .72, stagger: .055, ease: 'power3.out', clearProps: 'transform,filter' }
+    );
+  }
+
+  // Barre de progression générale et léger flou cinétique de l'arrière-plan.
+  function onScroll() {
+    if (scrollRaf) return;
+    scrollRaf = requestAnimationFrame(() => {
+      scrollRaf = 0;
+      const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+      progressBar.style.width = `${ratio * 100}%`;
+      const delta = Math.abs(window.scrollY - lastScrollY);
+      document.documentElement.style.setProperty('--scroll-blur', `${Math.min(1.7, delta / 42).toFixed(2)}px`);
+      lastScrollY = window.scrollY;
+      requestAnimationFrame(() => document.documentElement.style.setProperty('--scroll-blur', '0px'));
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  onScroll();
+
+  // Tilt 3D discret piloté par la souris.
+  if (!reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    document.querySelectorAll('.glass-card').forEach(card => {
+      card.addEventListener('pointermove', event => {
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - .5;
+        const y = (event.clientY - rect.top) / rect.height - .5;
+        card.style.setProperty('--ry', `${(x * 4.2).toFixed(2)}deg`);
+        card.style.setProperty('--rx', `${(-y * 4.2).toFixed(2)}deg`);
+      });
+      card.addEventListener('pointerleave', () => {
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+  }
+
+  // Visuel de courbe trapézoïdale ajouté à la diapositive correspondante.
+  const timeline = document.querySelector('#slide19 .timeline-container');
+  if (timeline) {
+    const plot = document.createElement('div');
+    plot.className = 'velocity-visual';
+    plot.setAttribute('role', 'img');
+    plot.setAttribute('aria-label', 'Courbe de vitesse trapézoïdale');
+    plot.innerHTML = `<svg viewBox="0 0 760 170" aria-hidden="true">
+      <defs><linearGradient id="velocityGradient" x1="0" x2="1"><stop offset="0" stop-color="#FF5500"/><stop offset=".55" stop-color="#FFB15A"/><stop offset="1" stop-color="#00D2FF"/></linearGradient></defs>
+      <g stroke="rgba(255,255,255,.10)" stroke-width="1"><path d="M24 22H738M24 62H738M24 102H738M24 142H738"/><path d="M24 18V146M202 18V146M380 18V146M558 18V146M738 18V146" stroke-dasharray="3 7"/></g>
+      <path d="M24 142 L24 132 L192 36 L568 36 L738 132" class="curve"/>
+      <path d="M24 142H738" stroke="rgba(255,255,255,.28)" stroke-width="1.2"/>
+      <circle cx="192" cy="36" r="4" fill="#FF9A5B"/><circle cx="568" cy="36" r="4" fill="#00D2FF"/>
+    </svg>`;
+    timeline.after(plot);
+  }
+
+  // Jauges proportionnelles aux valeurs affichées dans les trois cartes de calcul.
+  const calculationCards = document.querySelectorAll('#slide35 .grid-3 > div');
+  const rpmValues = [1529, 3824, 5735];
+  calculationCards.forEach((card, index) => {
+    const track = document.createElement('div');
+    track.className = 'ratio-track';
+    const fill = document.createElement('i');
+    fill.style.setProperty('--meter', `${Math.round((rpmValues[index] / 5735) * 100)}%`);
+    track.appendChild(fill);
+    card.appendChild(track);
+  });
+
+  // Images absentes : garder la diapositive exploitable avec un cadre technique de remplacement.
+  document.querySelectorAll('img.premium-img, img.gantt-img').forEach(img => {
+    const showFallback = () => {
+      if (img.dataset.fallbackShown) return;
+      img.dataset.fallbackShown = 'true';
+      img.style.display = 'none';
+      const placeholder = document.createElement('div');
+      placeholder.className = 'asset-fallback';
+      const tag = document.createElement('span');
+      tag.textContent = 'VISUEL LOCAL NON JOINT';
+      const title = document.createElement('strong');
+      title.textContent = img.alt || 'Illustration technique';
+      const hint = document.createElement('small');
+      hint.textContent = 'Placez le fichier image correspondant dans le même dossier que ce HTML.';
+      placeholder.append(tag, title, hint);
+      img.insertAdjacentElement('afterend', placeholder);
+    };
+    img.addEventListener('error', showFallback, { once: true });
+    if (img.complete && img.naturalWidth === 0) showFallback();
+  });
+
+  updateActive(0);
+  slides[0].classList.add('is-visible');
+  animateSlide(slides[0]);
+
+  // Particules fines et filets d'air sur Canvas 2D.
+  const canvas = document.getElementById('ambientCanvas');
+  const ctx = canvas && canvas.getContext ? canvas.getContext('2d', { alpha: true }) : null;
+  if (ctx && !reducedMotion) {
+    let width = 0, height = 0, dpr = 1, frame = 0;
+    const pointer = { x: .5, y: .5 };
+    const particles = [];
+    const count = Math.min(76, Math.max(34, Math.floor(window.innerWidth / 19)));
+    for (let i = 0; i < count; i++) {
+      particles.push({ x: Math.random(), y: Math.random(), r: .45 + Math.random() * 1.5, v: .00025 + Math.random() * .00065, a: .16 + Math.random() * .45, c: Math.random() > .22 ? '255,112,48' : '0,210,255', phase: Math.random() * Math.PI * 2 });
+    }
+    function resizeCanvas() {
+      dpr = Math.min(2, window.devicePixelRatio || 1);
+      width = window.innerWidth; height = window.innerHeight;
+      canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+      canvas.style.width = `${width}px`; canvas.style.height = `${height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    function draw(time) {
+      ctx.clearRect(0, 0, width, height);
+      const drift = Math.sin(time * .00018) * 22;
+      for (let j = 0; j < 6; j++) {
+        const y = height * (.18 + j * .13) + drift * (j % 2 ? 1 : -.55) + (pointer.y - .5) * 17;
+        ctx.beginPath();
+        ctx.moveTo(-30, y + 25);
+        ctx.bezierCurveTo(width * .24, y - 42, width * .53, y + 47, width + 40, y - 18);
+        ctx.strokeStyle = j % 3 === 0 ? 'rgba(0,210,255,.105)' : 'rgba(255,105,42,.085)';
+        ctx.lineWidth = j % 2 ? 1 : 1.25;
+        ctx.stroke();
+      }
+      particles.forEach(p => {
+        p.x += p.v * (1 + pointer.x * .25);
+        if (p.x > 1.04) { p.x = -.03; p.y = Math.random(); }
+        const px = p.x * width + (pointer.x - .5) * 13;
+        const py = p.y * height + Math.sin(time * .0005 + p.phase) * 8 + (pointer.y - .5) * 10;
+        const alpha = p.a * (.72 + Math.sin(time * .001 + p.phase) * .28);
+        ctx.beginPath(); ctx.arc(px, py, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${p.c},${alpha})`; ctx.fill();
+        if (p.r > 1.35) {
+          ctx.beginPath(); ctx.moveTo(px - 11, py); ctx.lineTo(px - 2, py);
+          ctx.strokeStyle = `rgba(${p.c},${alpha * .34})`; ctx.lineWidth = .7; ctx.stroke();
+        }
+      });
+      frame = requestAnimationFrame(draw);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas, { passive: true });
+    window.addEventListener('pointermove', event => {
+      pointer.x = event.clientX / Math.max(1, width);
+      pointer.y = event.clientY / Math.max(1, height);
+    }, { passive: true });
+    frame = requestAnimationFrame(draw);
+    window.addEventListener('pagehide', () => cancelAnimationFrame(frame), { once: true });
+  }
+})();
+</script>
+
+</body>
+</html>
